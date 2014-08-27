@@ -33,16 +33,27 @@ mkdir -p ${DOWNLOADS_DIR}
 # Packages for sane administration
 #
 log "Install system adminstration packages..."
-sudo apt-get install -y software-properties-common python-software-properties
+sudo apt-get install -y software-properties-common python-software-properties curl
 sudo add-apt-repository ppa:webupd8team/java
 sudo apt-get update -y
+
+#
+# Update Nodejs
+#
+sudo add-apt-repository ppa:chris-lea/node.js  
+sudo apt-get update -y
+sudo apt-get install -y nodejs 
+
 
 #
 # Required packages for Boundary Event SDK
 #
 log "Install required packages for Boundary Event SDK..."
 echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-sudo apt-get install -y oracle-java7-installer maven git autoconf make oracle-java7-set-default
+sudo apt-get install -y oracle-java7-installer maven git autoconf make oracle-java7-set-default snmp snmp-mibs-downloader
+sudo download-mibs
+
+exit 0
 
 # Install the Boundary Event SDK
 log "Install Boundary Event SDK..."
@@ -51,7 +62,7 @@ SDK_LOG="$HOME/boundary_sdk_log.$(date +"%Y-%m-%dT%H:%m")"
 sudo su - vagrant -c "touch hello"
 sudo su - vagrant -c "git clone https://github.com/boundary/boundary-event-sdk.git >> $SDK_LOG 2>&1"
 sudo su - vagrant -c "cd boundary-event-sdk && bash setup.sh  >> $SDK_LOG 2>&1"
-sudo su - vagrant -c "cd boundary-event-sdk && mvn install >> $SDK_LOG 2>&1"
+sudo su - vagrant -c "cd boundary-event-sdk && mvn assembly:assembly >> $SDK_LOG 2>&1"
 
 # Configure rsyslog
 
